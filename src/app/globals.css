@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+  --card: #1c1917;
+  --card-foreground: #fafaf9;
+  --muted: #292524;
+  --muted-foreground: #a8a29e;
+  --border: #44403c;
+  --input: #1c1917;
+  --ring: rgba(245, 158, 11, 0.5);
+  --amber: #f59e0b;
+  --amber-muted: #b45309;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-cormorant);
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)];
+  }
+  html {
+    @apply scroll-smooth;
+  }
+  html[data-reduce-motion="true"] *,
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+  /* Visible focus for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--background)];
+  }
+  /* Ensure focused element not obscured */
+  [data-focus-visible] {
+    scroll-margin: 2rem;
+  }
+}
