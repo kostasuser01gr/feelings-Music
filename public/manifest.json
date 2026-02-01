@@ -1,0 +1,10 @@
+{
+  "name": "Aurelia — Feelings & Music",
+  "short_name": "Aurelia",
+  "description": "Confessional album posts, music creation, and a 3D Cosmos where songs launch as golden auras and connect people.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
+  "orientation": "portrait-primary"
+}

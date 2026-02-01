@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+  --card: #1c1917;
+  --card-foreground: #fafaf9;
+  --muted: #292524;
+  --muted-foreground: #a8a29e;
+  --border: #44403c;
+  --input: #1c1917;
+  --ring: rgba(245, 158, 11, 0.5);
+  --amber: #f59e0b;
+  --amber-muted: #b45309;
+  --font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+}
+
+html[data-theme="aurora"] {
+  --background: #06131a;
+  --foreground: #e7f6ff;
+  --card: #0b202b;
+  --card-foreground: #e7f6ff;
+  --muted: #123241;
+  --muted-foreground: #98b8c7;
+  --border: #1f4a60;
+  --input: #0b202b;
+  --ring: rgba(34, 211, 238, 0.45);
+  --amber: #22d3ee;
+  --amber-muted: #0891b2;
+}
+
+html[data-theme="noir"] {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: #131316;
+  --card-foreground: #f4f4f5;
+  --muted: #1b1b1f;
+  --muted-foreground: #b3b3bb;
+  --border: #2b2b31;
+  --input: #131316;
+  --ring: rgba(147, 197, 253, 0.55);
+  --amber: #93c5fd;
+  --amber-muted: #60a5fa;
+}
+
+html[data-contrast="high"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0a;
+  --card-foreground: #ffffff;
+  --muted: #121212;
+  --muted-foreground: #e5e5e5;
+  --border: #ffffff;
+  --input: #0a0a0a;
+  --ring: rgba(255, 190, 24, 0.95);
+  --amber: #ffbf1f;
+  --amber-muted: #ff9f0a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-cormorant);
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)];
+  }
+  html {
+    @apply scroll-smooth;
+  }
+  html[data-reduce-motion="true"] *,
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+  /* Visible focus for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-[var(--ring)] ring-offset-2 ring-offset-[var(--background)];
+  }
+  /* Ensure focused element not obscured */
+  [data-focus-visible] {
+    scroll-margin: 2rem;
+  }
+}

@@ -1,0 +1,39 @@
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+test.describe("Accessibility", () => {
+  test("home has no critical a11y violations", async ({ page }) => {
+    await page.goto("/");
+    const results = await new AxeBuilder({ page }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    expect(critical).toEqual([]);
+  });
+
+  test("sanctuary has no critical a11y violations", async ({ page }) => {
+    await page.goto("/sanctuary");
+    const results = await new AxeBuilder({ page }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    expect(critical).toEqual([]);
+  });
+
+  test("studio has no critical a11y violations", async ({ page }) => {
+    await page.goto("/studio");
+    const results = await new AxeBuilder({ page }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    expect(critical).toEqual([]);
+  });
+
+  test("settings has no critical a11y violations", async ({ page }) => {
+    await page.goto("/settings");
+    const results = await new AxeBuilder({ page }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    expect(critical).toEqual([]);
+  });
+
+  test("cosmos has no critical a11y violations", async ({ page }) => {
+    await page.goto("/cosmos");
+    const results = await new AxeBuilder({ page }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    expect(critical).toEqual([]);
+  });
+});

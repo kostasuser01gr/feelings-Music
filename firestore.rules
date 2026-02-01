@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return isAuth() && request.auth.uid == uid; }
+    function isMember(arr) { return isAuth() && request.auth.uid in arr; }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /confessions/{id} {
+      allow create: if isAuth();
+      allow read: if resource.data.privacy == 'public'
+        || (resource.data.privacy == 'friends' && request.auth.uid in resource.get('friendIds', []))
+        || isOwner(resource.data.uid);
+      allow update, delete: if isOwner(resource.data.uid);
+    }
+
+    match /projects/{id} {
+      allow create: if isAuth();
+      allow read, write: if isAuth() && (
+        resource.data.ownerUid == request.auth.uid
+        || request.auth.uid in resource.get('members', [])
+      );
+    }
+
+    match /songs/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+      allow update, delete: if isAuth();
+    }
+
+    match /launchEvents/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+    }
+
+    match /connections/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+    }
+
+    match /reactions/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+      allow delete: if isOwner(resource.data.uid);
+    }
+
+    match /reports/{id} {
+      allow create: if isAuth();
+      allow read, update: if isAuth();
+    }
+
+    match /bands/{id} {
+      allow create: if isAuth();
+      allow read, update: if isAuth() && request.auth.uid in resource.get('memberIds', []);
+      allow delete: if false;
+    }
+  }
+}
