@@ -124,7 +124,7 @@ export function PlanetBuilder({ isOpen, onClose, onCreatePlanet }: PlanetBuilder
               <label className="block text-sm mb-1">Surface Type</label>
               <select
                 value={config.texture}
-                onChange={(e) => setConfig({ ...config, texture: e.target.value as any })}
+                onChange={(e) => setConfig({ ...config, texture: e.target.value as 'rocky' | 'gaseous' | 'icy' | 'desert' | 'ocean' })}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
               >
                 <option value="rocky">Rocky</option>

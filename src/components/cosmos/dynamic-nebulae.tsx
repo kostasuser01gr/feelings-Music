@@ -2,7 +2,6 @@
 
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Shader } from '@react-three/drei';
 import * as THREE from 'three';
 import { NebulaData } from '../../lib/cosmic-data-manager';
 import { AudioAnalysisData } from '../../lib/enhanced-audio-analyzer';
@@ -299,14 +298,14 @@ function Nebula({ data, audioData, index }: NebulaProps) {
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       vertexColors: true
-    }), [data.color, data.density]);
+    });
   }, [data.color, data.density]);
 
   // Update material uniforms with audio data
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!material) return;
     
-    material.uniforms.time.value = state.clock.elapsedTime;
+    material.uniforms.time.value = Date.now() * 0.001;
     
     if (audioData) {
       material.uniforms.audioEnergy.value = audioData.energy;
@@ -317,7 +316,7 @@ function Nebula({ data, audioData, index }: NebulaProps) {
       material.uniforms.scale.value = 1.0 + audioData.attack * 0.5;
     } else {
       // Default gentle movement when no audio
-      material.uniforms.audioEnergy.value = 0.3 + Math.sin(state.clock.elapsedTime * 0.5) * 0.2;
+      material.uniforms.audioEnergy.value = 0.3 + Math.sin(Date.now() * 0.0005) * 0.2;
       material.uniforms.audioBass.value = 0.2;
       material.uniforms.audioTreble.value = 0.2;
       material.uniforms.glowIntensity.value = 1.0;

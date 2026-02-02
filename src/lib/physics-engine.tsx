@@ -3,6 +3,10 @@
  * Realistic gravity, orbital mechanics, and collision detection
  */
 
+/// <reference types="@react-three/fiber" />
+
+'use client';
+
 import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -152,7 +156,7 @@ export function PhysicsPlanet({
     return () => {
       physics.removeBody(id);
     };
-  }, [id, physics]);
+  }, [id, initialPosition, initialVelocity, mass, radius, physics]);
   
   useFrame(() => {
     if (!meshRef.current || !bodyRef.current) return;
@@ -178,7 +182,7 @@ export function OrbitalPath({
   centerPosition: THREE.Vector3;
   bodyPosition: THREE.Vector3;
   segments?: number;
-}) {
+}): JSX.Element {
   const points = [];
   const radius = centerPosition.distanceTo(bodyPosition);
   
@@ -205,11 +209,11 @@ export function CollisionEffect({
 }: {
   position: THREE.Vector3;
   onComplete?: () => void;
-}) {
+}): JSX.Element {
   const groupRef = useRef<THREE.Group>(null);
   const progress = useRef(0);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
     
     progress.current += delta * 2;

@@ -72,7 +72,7 @@ export class AdvancedMusicAnalyzer {
    */
   initWithElement(audioElement: HTMLAudioElement): void {
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       this.analyser = this.audioContext.createAnalyser();
       
       // High resolution analysis
@@ -132,8 +132,8 @@ export class AdvancedMusicAnalyzer {
     }
     
     // Get frequency and time domain data
-    this.analyser.getByteFrequencyData(this.frequencyData);
-    this.analyser.getByteTimeDomainData(this.timeDomainData);
+    this.analyser.getByteFrequencyData(this.frequencyData as Uint8Array<ArrayBuffer>);
+    this.analyser.getByteTimeDomainData(this.timeDomainData as Uint8Array<ArrayBuffer>);
     
     // Calculate frequency bands
     const bass = this.getFrequencyBand(0, 250);
@@ -189,9 +189,9 @@ export class AdvancedMusicAnalyzer {
    * Get frequency band average (Hz to Hz)
    */
   private getFrequencyBand(lowHz: number, highHz: number): number {
-    if (!this.analyser || !this.frequencyData) return 0;
+    if (!this.analyser || !this.frequencyData || !this.audioContext) return 0;
     
-    const nyquist = this.audioContext!.sampleRate / 2;
+    const nyquist = this.audioContext.sampleRate / 2;
     const lowIndex = Math.floor(lowHz / nyquist * this.frequencyData.length);
     const highIndex = Math.ceil(highHz / nyquist * this.frequencyData.length);
     
@@ -401,3 +401,4 @@ export function getGlobalMusicAnalyzer(): AdvancedMusicAnalyzer {
   }
   return analyzerInstance;
 }
+// Type fix

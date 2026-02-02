@@ -171,9 +171,9 @@ interface MoonProps {
 function Moon({ data, parentScale, musicInfluence }: MoonProps) {
   const moonRef = useRef<THREE.Mesh>(null);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (moonRef.current) {
-      const time = state.clock.elapsedTime;
+      const time = Date.now() * 0.001;
       const angle = (data.angle * Math.PI / 180) + time * 0.5 * musicInfluence.rotationMultiplier;
       
       moonRef.current.position.x = Math.cos(angle) * data.distance * parentScale;
@@ -259,12 +259,13 @@ export function SolarSystem({
     });
   }, []);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
+    const time = Date.now() * 0.001;
     if (sunRef.current) {
       sunRef.current.rotation.y += delta * 0.5 * musicInfluence.rotationMultiplier;
       
       // Update sun shader uniforms
-      (sunRef.current.material as THREE.ShaderMaterial).uniforms.time.value = state.clock.elapsedTime;
+      (sunRef.current.material as THREE.ShaderMaterial).uniforms.time.value = time;
       (sunRef.current.material as THREE.ShaderMaterial).uniforms.intensity.value = 
         0.8 + musicInfluence.glowIntensity * 0.4;
       
@@ -358,19 +359,20 @@ function AsteroidBelt({ musicInfluence }: {
     return temp;
   }, [asteroidCount]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (instancedMesh.current) {
+      const time = Date.now() * 0.001;
       for (let i = 0; i < asteroidCount; i++) {
         const asteroid = asteroidPositions[i];
         const matrix = new THREE.Matrix4();
         
         // Create new rotation values without mutating original array
-        const rotX = asteroid.rotation[0] + state.clock.elapsedTime * 0.1 * musicInfluence.rotationMultiplier;
-        const rotY = asteroid.rotation[1] + state.clock.elapsedTime * 0.05 * musicInfluence.rotationMultiplier;
+        const rotX = asteroid.rotation[0] + time * 0.1 * musicInfluence.rotationMultiplier;
+        const rotY = asteroid.rotation[1] + time * 0.05 * musicInfluence.rotationMultiplier;
         const rotZ = asteroid.rotation[2];
         
         matrix.compose(
-          new THREE.Vector3(...asteroid.position),
+          new THREE.Vector3(...(asteroid.position as [number, number, number])),
           new THREE.Quaternion().setFromEuler(new THREE.Euler(rotX, rotY, rotZ)),
           new THREE.Vector3().setScalar(asteroid.scale * musicInfluence.scaleMultiplier)
         );

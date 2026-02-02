@@ -13,8 +13,8 @@ import { CosmicParticleEffects } from "./music-particles";
 import { EmotionDrivenCamera, GestureNavigation } from "./emotion-navigation";
 
 // Import data managers
-import { cosmicDataManager, type PlanetaryData, type NebulaData } from "../../lib/cosmic-data-manager";
-import { audioAnalyzer, type AudioAnalysisData, type CosmicMappingData } from "../../lib/enhanced-audio-analyzer";
+import { cosmicDataManager } from "../../lib/cosmic-data-manager";
+import { audioAnalyzer } from "../../lib/enhanced-audio-analyzer";
 import { useCosmicPerformance } from "../../lib/performance-system";
 
 function SceneBackground() {
@@ -44,7 +44,7 @@ function LoadingFallback() {
 export function SceneContent({ 
   reducedMotion = false, 
   audioEnabled = false, 
-  quality = 1.0,
+  initialQuality = 1.0,
   viewMode = 'explore' 
 }) {
   const groupRef = useRef();

@@ -8,6 +8,8 @@
  * - Film grain
  */
 
+'use client';
+
 import { useRef, useMemo } from 'react';
 import { extend, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -172,38 +174,39 @@ export function PostProcessing({
   composerRef.current = composer;
   
   // Update effects based on music
-  useFrame((state, delta) => {
+  useFrame(() => {
     if (!composerRef.current) return;
     
     const bass = musicData?.bass || 0;
     const volume = musicData?.volume || 0;
     const beat = musicData?.beat || false;
+    const time = Date.now() * 0.001;
     
     // Update bloom intensity
     if (bloomPass && enableBloom) {
-      bloomPass.strength = 1.5 + bass * 2 + (beat ? 0.5 : 0);
-      bloomPass.threshold = 0.85 - volume * 0.3;
+      (bloomPass as any).strength = 1.5 + bass * 2 + (beat ? 0.5 : 0);
+      (bloomPass as any).threshold = 0.85 - volume * 0.3;
     }
     
     // Update chromatic aberration
     if (chromaticPass && enableChromaticAberration) {
-      chromaticPass.uniforms.amount.value = 0.002 + bass * 0.008;
+      (chromaticPass as any).uniforms.amount.value = 0.002 + bass * 0.008;
     }
     
     // Update film grain
     if (grainPass && enableFilmGrain) {
-      grainPass.uniforms.time.value = state.clock.elapsedTime;
-      grainPass.uniforms.intensity.value = 0.08 + volume * 0.12;
+      (grainPass as any).uniforms.time.value = time;
+      (grainPass as any).uniforms.intensity.value = 0.08 + volume * 0.12;
     }
     
     // Update vignette
     if (vignettePass && enableVignette) {
-      vignettePass.uniforms.darkness.value = 0.5 + bass * 0.3;
+      (vignettePass as any).uniforms.darkness.value = 0.5 + bass * 0.3;
     }
     
     // Render
     composerRef.current.render();
-  }, 1); // Priority 1 to render after scene updates
+  });
   
   return null;
 }
@@ -223,18 +226,19 @@ export function VolumetricLight({
   const lightRef = useRef<THREE.PointLight>(null);
   const geometryRef = useRef<THREE.SphereGeometry>(null);
   
-  useFrame((state) => {
+  useFrame(() => {
     if (!lightRef.current) return;
     
     const volume = musicData?.volume || 0;
     const beat = musicData?.beat || false;
+    const time = Date.now() * 0.001;
     
     // Pulse light intensity
     const pulseIntensity = intensity * (1 + volume * 2 + (beat ? 0.5 : 0));
     lightRef.current.intensity = pulseIntensity;
     
     // Animate light position slightly
-    lightRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.5;
+    lightRef.current.position.y = position[1] + Math.sin(time) * 0.5;
   });
   
   return (
@@ -283,7 +287,7 @@ export function LensFlare({
     ];
   }, []);
   
-  useFrame((state) => {
+  useFrame(() => {
     if (!groupRef.current) return;
     
     const volume = musicData?.volume || 0;

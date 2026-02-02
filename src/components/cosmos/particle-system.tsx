@@ -8,6 +8,8 @@
  * - Energy bursts
  */
 
+'use client';
+
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -124,12 +126,17 @@ export function ParticleSystem({
   }, [count, color, size, type]);
   
   // Animate particles
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!pointsRef.current || !velocitiesRef.current || !lifetimesRef.current) return;
     
-    const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
-    const colors = pointsRef.current.geometry.attributes.color.array as Float32Array;
-    const sizes = pointsRef.current.geometry.attributes.size.array as Float32Array;
+    const geometry = pointsRef.current.geometry as THREE.BufferGeometry;
+    const positionAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
+    const colorAttr = geometry.getAttribute('color') as THREE.BufferAttribute;
+    const sizeAttr = geometry.getAttribute('size') as THREE.BufferAttribute;
+    
+    const positions = positionAttr.array as Float32Array;
+    const colors = colorAttr.array as Float32Array;
+    const sizes = sizeAttr.array as Float32Array;
     const velocities = velocitiesRef.current;
     const lifetimes = lifetimesRef.current;
     
@@ -180,12 +187,19 @@ export function ParticleSystem({
       colors[i3 + 2] *= fade;
     }
     
-    pointsRef.current.geometry.attributes.position.needsUpdate = true;
-    pointsRef.current.geometry.attributes.color.needsUpdate = true;
-    pointsRef.current.geometry.attributes.size.needsUpdate = true;
-    
-    // Rotate entire system slightly
-    pointsRef.current.rotation.y += delta * 0.02 * (1 + bassInfluence);
+    if (pointsRef.current) {
+      const geometry = pointsRef.current.geometry as THREE.BufferGeometry;
+      const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
+      const colorAttr = geometry.getAttribute('color') as THREE.BufferAttribute;
+      const sizeAttr = geometry.getAttribute('size') as THREE.BufferAttribute;
+      
+      posAttr.needsUpdate = true;
+      colorAttr.needsUpdate = true;
+      sizeAttr.needsUpdate = true;
+      
+      // Rotate entire system slightly
+      pointsRef.current.rotation.y += delta * 0.02 * (1 + bassInfluence);
+    }
   });
   
   return (
@@ -240,7 +254,7 @@ export function ShootingStars({ musicData }: { musicData?: MusicAnalysisData }) 
     }));
   }, []);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
     
     const beat = musicData?.beat || false;

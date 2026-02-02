@@ -3,18 +3,20 @@
  * Interactive tool for connecting stars and creating patterns
  */
 
-import { useRef, useState, useCallback } from 'react';
+'use client';
+
+import { useRef, useState, useCallback, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 
-interface Star {
+export interface Star {
   id: string;
   position: THREE.Vector3;
   selected: boolean;
 }
 
-interface Constellation {
+export interface Constellation {
   id: string;
   name: string;
   stars: string[];
@@ -130,12 +132,20 @@ function InteractiveStar({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  useFrame((state) => {
+  useFrame(() => {
     if (!meshRef.current) return;
     
     // Pulse effect
-    const scale = (isSelected ? 1.5 : 1) + (hovered ? 0.3 : 0) + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+    const time = Date.now() * 0.001;
+    const scale = (isSelected ? 1.5 : 1) + (hovered ? 0.3 : 0) + Math.sin(time * 2) * 0.1;
     meshRef.current.scale.setScalar(scale);
+    
+    // Update material if needed
+    const material = meshRef.current.material as THREE.MeshBasicMaterial;
+    if (material) {
+      material.color.setStyle(isSelected ? '#ffff00' : '#ffffff');
+      material.opacity = isSelected || hovered ? 1 : 0.7;
+    }
   });
   
   return (

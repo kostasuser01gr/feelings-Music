@@ -3,7 +3,9 @@
  * Interactive 3D terrain when landing on planets
  */
 
-import { useRef, useMemo } from 'react';
+'use client';
+
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { MusicAnalysisData } from '@/lib/advanced-music-analyzer';
@@ -72,19 +74,20 @@ function ProceduralTerrain({
   useEffect(() => {
     if (!geometryRef.current) return;
     
-    const positions = geometryRef.current.attributes.position.array as Float32Array;
+    const posAttr = geometryRef.current.getAttribute('position') as THREE.BufferAttribute;
+    const positions = posAttr.array as Float32Array;
     const size = 128;
     
     for (let i = 0; i < positions.length / 3; i++) {
       positions[i * 3 + 2] = heightData[i] || 0;
     }
     
-    geometryRef.current.attributes.position.needsUpdate = true;
+    posAttr.needsUpdate = true;
     geometryRef.current.computeVertexNormals();
   }, [heightData]);
   
   // Animate terrain based on music
-  useFrame((state, delta) => {
+  useFrame(() => {
     if (!meshRef.current) return;
     
     const bass = musicData?.bass || 0;
@@ -152,11 +155,12 @@ function AtmosphericEffects({
 function LandingPad({ onExit }: { onExit?: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
   
-  useFrame((state) => {
+  useFrame(() => {
     if (!meshRef.current) return;
     
     // Rotating platform
-    meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+    const time = Date.now() * 0.001;
+    meshRef.current.rotation.y = time * 0.2;
   });
   
   return (

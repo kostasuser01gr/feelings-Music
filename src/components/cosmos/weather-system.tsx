@@ -3,6 +3,8 @@
  * Animated atmospheric effects: clouds, storms, auroras
  */
 
+'use client';
+
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -63,17 +65,19 @@ function EarthWeather({ radius, musicData }: { radius: number; musicData?: Music
     return new THREE.CanvasTexture(canvas);
   }, []);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (cloudRef.current) {
       cloudRef.current.rotation.y += delta * 0.05;
       
       const volume = musicData?.volume || 0;
-      cloudRef.current.material.opacity = 0.3 + volume * 0.2;
+      const material = cloudRef.current.material as THREE.MeshStandardMaterial;
+      if (material) material.opacity = 0.3 + volume * 0.2;
     }
     
     if (auroraRef.current) {
       const bass = musicData?.bass || 0;
-      auroraRef.current.material.opacity = 0.5 + bass * 0.5;
+      const material = auroraRef.current.material as THREE.MeshBasicMaterial;
+      if (material) material.opacity = 0.5 + bass * 0.5;
       auroraRef.current.rotation.y += delta * 0.1;
     }
   });
@@ -119,14 +123,15 @@ function JupiterStorms({ radius, musicData }: { radius: number; musicData?: Musi
     }));
   }, []);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!stormRef.current) return;
     
     const volume = musicData?.volume || 0;
+    const time = Date.now() * 0.001;
     
     stormRef.current.children.forEach((child, i) => {
       child.rotation.z += delta * storms[i].speed * (1 + volume);
-      child.scale.setScalar(1 + Math.sin(state.clock.elapsedTime + i) * 0.1);
+      child.scale.setScalar(1 + Math.sin(time + i) * 0.1);
     });
   });
   
