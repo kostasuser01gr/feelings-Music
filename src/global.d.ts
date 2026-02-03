@@ -2,7 +2,10 @@
  * Global type declarations for the application
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as THREE from 'three';
+import '@react-three/fiber';
 
 declare global {
   namespace JSX {
@@ -29,6 +32,7 @@ declare global {
       dodecahedronGeometry: any;
       icosahedronGeometry: any;
       bufferGeometry: any;
+      bufferAttribute: any;
       
       // Material types
       meshBasicMaterial: any;
@@ -49,6 +53,7 @@ declare global {
       
       // Other
       primitive: any;
+      color: any;
     }
   }
 }

@@ -2,7 +2,10 @@
  * React Three Fiber JSX type extensions
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as React from 'react';
+import '@react-three/fiber';
 
 declare global {
   namespace JSX {
@@ -36,6 +39,7 @@ declare global {
       octahedronGeometry: any;
       tetrahedronGeometry: any;
       bufferGeometry: any;
+      bufferAttribute: any;
       
       // Materials
       meshBasicMaterial: any;
@@ -63,8 +67,11 @@ declare global {
       
       // Other
       primitive: any;
+      color: any;
     }
   }
 }
+
+export {};
 
 export {};

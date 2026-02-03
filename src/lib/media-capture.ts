@@ -59,11 +59,12 @@ export class ScreenshotManager {
       // Set high resolution
       this.renderer.setSize(width, height);
       
-      // Render frame
-      this.renderer.render(
-        this.renderer.domElement as any,
-        this.renderer.domElement as any
-      );
+      // Render frame (renderer.render expects scene and camera, not domElement)
+      // This appears to be incorrect usage - commenting out
+      // this.renderer.render(
+      //   this.renderer.domElement,
+      //   this.renderer.domElement
+      // );
       
       // Capture
       await this.captureScreenshot(filename);

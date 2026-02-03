@@ -4,7 +4,6 @@
  * reverb zones, and dynamic audio environment mapping
  */
 
-import * as Tone from 'tone';
 import * as THREE from 'three';
 
 export interface SpatialAudioConfig {
@@ -104,8 +103,8 @@ export interface BinauralProcessor {
 }
 
 export class ImmersiveAudioEngine {
-  private audioContext: AudioContext;
-  private masterGain: GainNode;
+  private audioContext!: AudioContext;
+  private masterGain!: GainNode;
   private listenerPosition: THREE.Vector3;
   private listenerOrientation: THREE.Quaternion;
   private listenerVelocity: THREE.Vector3;
@@ -118,24 +117,24 @@ export class ImmersiveAudioEngine {
   private hrtfData?: HRTFData;
   
   // Audio processing nodes
-  private reverbNode: ConvolverNode;
-  private delayNode: DelayNode;
-  private compressor: DynamicsCompressorNode;
-  private analyser: AnalyserNode;
-  private spatialAnalyser: AnalyserNode;
+  private reverbNode!: ConvolverNode;
+  private delayNode!: DelayNode;
+  private compressor!: DynamicsCompressorNode;
+  private analyser!: AnalyserNode;
+  private spatialAnalyser!: AnalyserNode;
   
   // Environment simulation
-  private roomToneGenerator: OscillatorNode;
-  private cosmicAmbienceNode: GainNode;
-  private weatherEffectsNode: GainNode;
+  private roomToneGenerator!: OscillatorNode;
+  private cosmicAmbienceNode!: GainNode;
+  private weatherEffectsNode!: GainNode;
   
   // Audio effects chains
   private effectChains: Map<string, AudioNode[]> = new Map();
-  private environmentChain: AudioNode[];
+  private environmentChain!: AudioNode[];
   
   // Real-time audio data
-  private frequencyData: Float32Array;
-  private spatialFrequencyData: Float32Array;
+  private frequencyData!: Float32Array;
+  private spatialFrequencyData!: Float32Array;
   private audioMetrics: AudioMetrics;
   
   private isInitialized = false;
@@ -175,7 +174,7 @@ export class ImmersiveAudioEngine {
 
     try {
       // Create audio context
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       await this.audioContext.resume();
 
       // Create master audio chain
@@ -585,12 +584,13 @@ export class ImmersiveAudioEngine {
       }
     } else {
       // Legacy Web Audio API
-      (this.audioContext.listener as any).setPosition(position.x, position.y, position.z);
+      const listener = this.audioContext.listener as AudioListener & { setPosition?: (x: number, y: number, z: number) => void; setOrientation?: (x: number, y: number, z: number, xUp: number, yUp: number, zUp: number) => void };
+      listener.setPosition?.(position.x, position.y, position.z);
       
       if (orientation) {
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(orientation);
         const up = new THREE.Vector3(0, 1, 0).applyQuaternion(orientation);
-        (this.audioContext.listener as any).setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
+        listener.setOrientation?.(forward.x, forward.y, forward.z, up.x, up.y, up.z);
       }
     }
 
@@ -642,8 +642,8 @@ export class ImmersiveAudioEngine {
 
     // Apply Doppler effect if source has velocity
     if (source.velocity.length() > 0) {
-      const dopplerShift = this.calculateDopplerShift(source.velocity, sourceToListener);
-      // Apply doppler shift to playback rate (would need access to source node)
+      // Calculate doppler shift (would need access to source node to apply)
+      this.calculateDopplerShift(source.velocity, sourceToListener);
     }
   }
 
@@ -678,7 +678,7 @@ export class ImmersiveAudioEngine {
 
   private updateConvolverBuffer(convolver: ConvolverNode, impulseData: Float32Array): void {
     const buffer = this.audioContext.createBuffer(1, impulseData.length, this.audioContext.sampleRate);
-    buffer.copyToChannel(impulseData, 0);
+    buffer.copyToChannel(impulseData as Float32Array, 0);
     convolver.buffer = buffer;
   }
 
@@ -784,7 +784,7 @@ export class ImmersiveAudioEngine {
     return blended;
   }
 
-  private updateReverbSettings(reverbSettings: AudioZoneProperties['reverb']): void {
+  private updateReverbSettings(_reverbSettings: AudioZoneProperties['reverb']): void {
     // Would need to recreate reverb impulse response with new settings
     // For now, we'll just adjust the wet level
     if (this.reverbNode && this.environmentChain.includes(this.reverbNode)) {
@@ -796,8 +796,8 @@ export class ImmersiveAudioEngine {
   updateAudioMetrics(): void {
     if (!this.analyser) return;
     
-    this.analyser.getFloatFrequencyData(this.frequencyData);
-    this.spatialAnalyser.getFloatFrequencyData(this.spatialFrequencyData);
+    this.analyser.getFloatFrequencyData(this.frequencyData as Float32Array);
+    this.spatialAnalyser.getFloatFrequencyData(this.spatialFrequencyData as Float32Array);
     
     // Calculate audio metrics
     this.audioMetrics = {
@@ -805,7 +805,7 @@ export class ImmersiveAudioEngine {
       bufferSize: this.audioContext.sampleRate / 60, // Estimate
       sampleRate: this.audioContext.sampleRate,
       spatialAccuracy: this.calculateSpatialAccuracy(),
-      processingLoad: this.calculateProcessingLoad()
+      processingLoad: this.calculateProcessingLoad() || 0
     };
   }
 

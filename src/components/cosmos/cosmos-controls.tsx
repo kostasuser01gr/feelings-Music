@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUIStore } from "@/stores/ui-store";
-import { initAudio, getTempo, setTempo } from "@/lib/audio-engine";
+import { initAudio, setTempo } from "@/lib/audio-engine";
 import { cosmicDataManager } from "@/lib/cosmic-data-manager";
 import { audioAnalyzer, type AudioAnalysisData } from "@/lib/enhanced-audio-analyzer";
 
@@ -47,7 +47,7 @@ export function CosmosControls({
         
         audioAnalyzer.start(
           (analysis) => setAudioData(analysis),
-          (cosmicMapping) => {
+          () => {
             // Handle cosmic mapping if needed
           }
         );

@@ -6,7 +6,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 
@@ -36,7 +36,13 @@ export function ConstellationDrawer({
   const [selectedStars, setSelectedStars] = useState<string[]>([]);
   const [connections, setConnections] = useState<Array<[string, string]>>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [constellationColor] = useState(`#${Math.floor(Math.random() * 16777215).toString(16)}`);
+  
+  // Generate color once during component mount using useRef
+  const constellationColorRef = useRef<string>('');
+  if (!constellationColorRef.current) {
+    constellationColorRef.current = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+  }
+  const constellationColor = constellationColorRef.current;
   
   const handleStarClick = useCallback((starId: string) => {
     if (!isDrawing) {

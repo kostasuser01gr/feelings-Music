@@ -52,13 +52,13 @@ export interface TimelineEntry {
   type: 'scene' | 'transition' | 'effect' | 'audio' | 'text' | 'camera_movement';
   layer: number;
   enabled: boolean;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   keyframes: Keyframe[];
 }
 
 export interface Keyframe {
   time: number; // relative to timeline entry start
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'bounce' | 'elastic';
 }
 
@@ -67,7 +67,7 @@ export interface ProjectAsset {
   name: string;
   type: 'audio' | 'texture' | 'model' | 'custom_element' | 'preset' | 'shader';
   url?: string;
-  data?: any;
+  data?: unknown;
   size: number; // bytes
   createdAt: number;
   usedInEntries: string[]; // timeline entry IDs
@@ -122,7 +122,7 @@ export interface RecordingSession {
 export interface CapturedEvent {
   timestamp: number;
   type: 'camera_movement' | 'user_interaction' | 'cosmic_event' | 'audio_trigger' | 'effect_change';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export interface ShareableExperience {
@@ -164,11 +164,11 @@ export interface CustomCosmicElement {
   shader?: {
     vertex: string;
     fragment: string;
-    uniforms: Record<string, any>;
+    uniforms: Record<string, unknown>;
   };
   geometry?: {
     type: string;
-    parameters: Record<string, any>;
+    parameters: Record<string, unknown>;
   };
   behavior?: {
     animation: AnimationBehavior;
@@ -185,7 +185,7 @@ export interface CustomCosmicElement {
 export interface ElementParameter {
   name: string;
   type: 'number' | 'color' | 'texture' | 'vector' | 'boolean' | 'select' | 'range';
-  defaultValue: any;
+  defaultValue: unknown;
   min?: number;
   max?: number;
   step?: number;
@@ -196,7 +196,7 @@ export interface ElementParameter {
 
 export interface AnimationBehavior {
   type: 'orbital' | 'linear' | 'random_walk' | 'wave' | 'spiral' | 'custom';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   duration?: number;
   loop: boolean;
   easing: string;
@@ -211,7 +211,7 @@ export interface InteractionBehavior {
 export interface InteractionResponse {
   trigger: string;
   action: 'animate' | 'change_property' | 'emit_particles' | 'play_sound' | 'change_scene';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface PhysicsBehavior {
@@ -247,7 +247,16 @@ export class CreativeToolsManager {
     onExportProgress: (job: ExportJob) => void;
     onExportCompleted: (job: ExportJob) => void;
     onCustomElementCreated: (element: CustomCosmicElement) => void;
-  } = {} as any;
+  } = {
+    onProjectCreated: () => {},
+    onProjectUpdated: () => {},
+    onRecordingStarted: () => {},
+    onRecordingProgress: () => {},
+    onRecordingCompleted: () => {},
+    onExportProgress: () => {},
+    onExportCompleted: () => {},
+    onCustomElementCreated: () => {}
+  };
 
   constructor() {
     this.initializeDefaultElements();
@@ -308,7 +317,7 @@ export class CreativeToolsManager {
     };
   }
 
-  loadProject(projectId: string): CreativeProject | null {
+  loadProject(projectId: string): CreativeProject | undefined {
     const project = this.projects.get(projectId);
     if (project) {
       this.currentProject = project;
@@ -542,12 +551,12 @@ export class CreativeToolsManager {
   }
 
   private startEventCapture(session: RecordingSession): void {
-    const captureEvent = (type: string, data: any) => {
+    const captureEvent = (type: CapturedEvent['type'], data: Record<string, unknown>) => {
       if (!session.isRecording) return;
       
       session.capturedEvents.push({
         timestamp: Date.now() - session.startTime,
-        type: type as any,
+        type,
         data
       });
     };
@@ -734,7 +743,7 @@ export class CreativeToolsManager {
     }
   }
 
-  private async generateVideoOutput(project: CreativeProject, settings: ProjectSettings): Promise<string> {
+  private async generateVideoOutput(_project: CreativeProject, _settings: ProjectSettings): Promise<string> {
     // In a real implementation, this would:
     // 1. Render each frame of the timeline
     // 2. Encode video using WebCodecs API or server-side processing
@@ -746,25 +755,25 @@ export class CreativeToolsManager {
     return URL.createObjectURL(videoBlob);
   }
 
-  private async generateGifOutput(project: CreativeProject, settings: ProjectSettings): Promise<string> {
+  private async generateGifOutput(_project: CreativeProject, _settings: ProjectSettings): Promise<string> {
     // Generate animated GIF
     const gifBlob = new Blob(['mock gif data'], { type: 'image/gif' });
     return URL.createObjectURL(gifBlob);
   }
 
-  private async generateImageSequence(project: CreativeProject, settings: ProjectSettings): Promise<string> {
+  private async generateImageSequence(_project: CreativeProject, _settings: ProjectSettings): Promise<string> {
     // Generate ZIP file with image sequence
     const zipBlob = new Blob(['mock zip data'], { type: 'application/zip' });
     return URL.createObjectURL(zipBlob);
   }
 
-  private async generateVR360Output(project: CreativeProject, settings: ProjectSettings): Promise<string> {
+  private async generateVR360Output(_project: CreativeProject, _settings: ProjectSettings): Promise<string> {
     // Generate 360-degree VR video
     const vrBlob = new Blob(['mock vr data'], { type: 'video/mp4' });
     return URL.createObjectURL(vrBlob);
   }
 
-  private async generateInteractiveOutput(project: CreativeProject, settings: ProjectSettings): Promise<string> {
+  private async generateInteractiveOutput(_project: CreativeProject, _settings: ProjectSettings): Promise<string> {
     // Generate interactive web experience
     const htmlBlob = new Blob(['mock interactive html'], { type: 'text/html' });
     return URL.createObjectURL(htmlBlob);

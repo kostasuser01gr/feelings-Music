@@ -42,10 +42,7 @@ function LoadingFallback() {
 }
 
 export function SceneContent({ 
-  reducedMotion = false, 
-  audioEnabled = false, 
-  initialQuality = 1.0,
-  viewMode = 'explore' 
+  reducedMotion = false
 }) {
   const groupRef = useRef();
   
@@ -60,11 +57,7 @@ export function SceneContent({
   
   // Performance monitoring
   const { 
-    metrics, 
-    quality, 
-    lodManager, 
-    frustumCuller,
-    setQuality 
+    quality
   } = useCosmicPerformance({
     targetFPS: reducedMotion ? 30 : 60,
     adaptiveQuality: !reducedMotion,
@@ -134,9 +127,6 @@ export function SceneContent({
   };
 
   // Performance quality adjustment
-  const adjustedSegments = reducedMotion ? 16 : Math.floor(32 * quality);
-  const particleCount = Math.floor(2000 * quality);
-
   if (!isInitialized) {
     return (
       <Suspense fallback={<LoadingFallback />}>
@@ -189,7 +179,7 @@ export function SceneContent({
           smoothing: 0.1,
           boundaryRadius: 100
         }}
-        onPositionChange={(position, lookAt) => {
+        onPositionChange={() => {
           // Camera position change callback
         }}
       />

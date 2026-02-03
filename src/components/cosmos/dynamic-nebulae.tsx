@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { NebulaData } from '../../lib/cosmic-data-manager';
@@ -12,13 +12,23 @@ interface NebulaProps {
   index: number;
 }
 
-function Nebula({ data, audioData, index }: NebulaProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
+function Nebula({ data, audioData }: NebulaProps) {
   const particlesRef = useRef<THREE.Points>(null);
   
   // Procedural nebula geometry based on type and music
   const geometry = useMemo(() => {
+    // Seeded random generator for deterministic particles
+    const createSeededRandom = (seed: number) => {
+      let value = seed;
+      return () => {
+        value = (value * 9301 + 49297) % 233280;
+        return value / 233280;
+      };
+    };
+    
     const particleCount = Math.min(data.particleCount, 5000); // Performance limit
+    const random = createSeededRandom(particleCount + data.type.charCodeAt(0) * 1000);
+    
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const sizes = new Float32Array(particleCount);
@@ -35,15 +45,15 @@ function Nebula({ data, audioData, index }: NebulaProps) {
       switch (data.type) {
         case 'emission':
           // Spherical with central density
-          const radius = Math.random() * data.size;
-          const theta = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
+          const radius = random() * data.size;
+          const theta = random() * Math.PI * 2;
+          const phi = Math.acos(2 * random() - 1);
           x = radius * Math.sin(phi) * Math.cos(theta);
           y = radius * Math.sin(phi) * Math.sin(theta);
           z = radius * Math.cos(phi);
           // Central concentration
           const centralFactor = 1 - (radius / data.size);
-          if (Math.random() > centralFactor * 0.7) {
+          if (random() > centralFactor * 0.7) {
             x *= 0.3;
             y *= 0.3;
             z *= 0.3;
@@ -52,18 +62,18 @@ function Nebula({ data, audioData, index }: NebulaProps) {
           
         case 'reflection':
           // Disc-like structure
-          const discRadius = Math.sqrt(Math.random()) * data.size;
-          const discAngle = Math.random() * Math.PI * 2;
+          const discRadius = Math.sqrt(random()) * data.size;
+          const discAngle = random() * Math.PI * 2;
           x = discRadius * Math.cos(discAngle);
-          y = (Math.random() - 0.5) * data.size * 0.1;
+          y = (random() - 0.5) * data.size * 0.1;
           z = discRadius * Math.sin(discAngle);
           break;
           
         case 'dark':
           // Irregular, clumpy structure
-          x = (Math.random() - 0.5) * data.size;
-          y = (Math.random() - 0.5) * data.size;
-          z = (Math.random() - 0.5) * data.size;
+          x = (random() - 0.5) * data.size;
+          y = (random() - 0.5) * data.size;
+          z = (random() - 0.5) * data.size;
           // Create clumps using noise
           const clumpFactor = (Math.sin(x * 0.1) + Math.cos(y * 0.1) + Math.sin(z * 0.1)) / 3;
           if (Math.abs(clumpFactor) < 0.3) {
@@ -75,18 +85,18 @@ function Nebula({ data, audioData, index }: NebulaProps) {
           
         case 'planetary':
           // Ring structure around center
-          const ringRadius = (0.5 + Math.random() * 0.5) * data.size;
-          const ringAngle = Math.random() * Math.PI * 2;
-          const ringHeight = (Math.random() - 0.5) * data.size * 0.2;
+          const ringRadius = (0.5 + random() * 0.5) * data.size;
+          const ringAngle = random() * Math.PI * 2;
+          const ringHeight = (random() - 0.5) * data.size * 0.2;
           x = ringRadius * Math.cos(ringAngle);
           y = ringHeight;
           z = ringRadius * Math.sin(ringAngle);
           break;
           
         default:
-          x = (Math.random() - 0.5) * data.size;
-          y = (Math.random() - 0.5) * data.size;
-          z = (Math.random() - 0.5) * data.size;
+          x = (random() - 0.5) * data.size;
+          y = (random() - 0.5) * data.size;
+          z = (random() - 0.5) * data.size;
       }
       
       positions[i3] = x;
@@ -95,19 +105,19 @@ function Nebula({ data, audioData, index }: NebulaProps) {
       
       // Color variation within nebula
       const variation = 0.3;
-      colors[i3] = color.r + (Math.random() - 0.5) * variation;
-      colors[i3 + 1] = color.g + (Math.random() - 0.5) * variation;
-      colors[i3 + 2] = color.b + (Math.random() - 0.5) * variation;
+      colors[i3] = color.r + (random() - 0.5) * variation;
+      colors[i3 + 1] = color.g + (random() - 0.5) * variation;
+      colors[i3 + 2] = color.b + (random() - 0.5) * variation;
       
       // Particle sizes based on density and distance from center
       const distance = Math.sqrt(x * x + y * y + z * z);
       const densityFactor = 1 - (distance / data.size);
-      sizes[i] = (0.02 + Math.random() * 0.08) * data.density * densityFactor;
+      sizes[i] = (0.02 + random() * 0.08) * data.density * densityFactor;
       
       // Initial velocities for particle movement
-      velocities[i3] = (Math.random() - 0.5) * 0.001;
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.001;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.001;
+      velocities[i3] = (random() - 0.5) * 0.001;
+      velocities[i3 + 1] = (random() - 0.5) * 0.001;
+      velocities[i3 + 2] = (random() - 0.5) * 0.001;
     }
     
     const geometry = new THREE.BufferGeometry();
@@ -117,7 +127,7 @@ function Nebula({ data, audioData, index }: NebulaProps) {
     geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
     
     return geometry;
-  }, [data]);
+  }, [data.particleCount, data.size, data.color, data.type, data.density]);
   
   // Advanced nebula material with music responsiveness
   const material = useMemo(() => {

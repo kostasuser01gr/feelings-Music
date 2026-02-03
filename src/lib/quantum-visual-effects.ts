@@ -12,7 +12,7 @@ export interface QuantumEffect {
   intensity: number;
   duration: number;
   startTime: number;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }
 
 export interface QuantumVisualizationParams {
@@ -28,7 +28,7 @@ export class QuantumVisualEffects {
   private effects: Map<string, QuantumEffect> = new Map();
   private shaderMaterials: Map<string, THREE.ShaderMaterial> = new Map();
   private geometries: Map<string, THREE.BufferGeometry> = new Map();
-  private uniforms: Map<string, any> = new Map();
+  private uniforms: Map<string, Record<string, { value: unknown }>> = new Map();
   
   private clock = new THREE.Clock();
   private frameCount = 0;

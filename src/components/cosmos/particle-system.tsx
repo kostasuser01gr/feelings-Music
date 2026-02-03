@@ -36,8 +36,20 @@ export function ParticleSystem({
   const velocitiesRef = useRef<Float32Array | null>(null);
   const lifetimesRef = useRef<Float32Array | null>(null);
   
+  // Seeded random generator for deterministic particle positions
+  const createSeededRandom = (seed: number) => {
+    let value = seed;
+    return () => {
+      value = (value * 9301 + 49297) % 233280;
+      return value / 233280;
+    };
+  };
+  
   // Create particle geometry and materials
   const { positions, colors, sizes } = useMemo(() => {
+    // Create seeded random for deterministic particles
+    const random = createSeededRandom(count * (type === 'stars' ? 1 : type === 'nebula' ? 2 : type === 'burst' ? 3 : type === 'orbital' ? 4 : 5));
+    
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -53,33 +65,33 @@ export function ParticleSystem({
       switch (type) {
         case 'stars':
           // Random sphere distribution
-          const theta = Math.random() * Math.PI * 2;
-          const phi = Math.acos(2 * Math.random() - 1);
-          const radius = 50 + Math.random() * 150;
+          const theta = random() * Math.PI * 2;
+          const phi = Math.acos(2 * random() - 1);
+          const radius = 50 + random() * 150;
           positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
           positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
           positions[i3 + 2] = radius * Math.cos(phi);
-          velocities[i3] = (Math.random() - 0.5) * 0.01;
-          velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
-          velocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
+          velocities[i3] = (random() - 0.5) * 0.01;
+          velocities[i3 + 1] = (random() - 0.5) * 0.01;
+          velocities[i3 + 2] = (random() - 0.5) * 0.01;
           break;
           
         case 'nebula':
           // Clustered cloud
-          const angle = Math.random() * Math.PI * 2;
-          const distance = Math.random() * 30;
+          const angle = random() * Math.PI * 2;
+          const distance = random() * 30;
           positions[i3] = Math.cos(angle) * distance;
-          positions[i3 + 1] = (Math.random() - 0.5) * 10;
+          positions[i3 + 1] = (random() - 0.5) * 10;
           positions[i3 + 2] = Math.sin(angle) * distance;
           velocities[i3] = Math.cos(angle) * 0.02;
-          velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
+          velocities[i3 + 1] = (random() - 0.5) * 0.01;
           velocities[i3 + 2] = Math.sin(angle) * 0.02;
           break;
           
         case 'burst':
           // Radial burst from center
-          const burstTheta = Math.random() * Math.PI * 2;
-          const burstPhi = Math.acos(2 * Math.random() - 1);
+          const burstTheta = random() * Math.PI * 2;
+          const burstPhi = Math.acos(2 * random() - 1);
           positions[i3] = 0;
           positions[i3 + 1] = 0;
           positions[i3 + 2] = 0;
@@ -91,9 +103,9 @@ export function ParticleSystem({
         case 'orbital':
           // Ring around origin
           const orbitalAngle = (i / count) * Math.PI * 2;
-          const orbitalRadius = 20 + Math.random() * 5;
+          const orbitalRadius = 20 + random() * 5;
           positions[i3] = Math.cos(orbitalAngle) * orbitalRadius;
-          positions[i3 + 1] = (Math.random() - 0.5) * 2;
+          positions[i3 + 1] = (random() - 0.5) * 2;
           positions[i3 + 2] = Math.sin(orbitalAngle) * orbitalRadius;
           velocities[i3] = -Math.sin(orbitalAngle) * 0.05;
           velocities[i3 + 1] = 0;
@@ -101,22 +113,22 @@ export function ParticleSystem({
           break;
           
         default:
-          positions[i3] = (Math.random() - 0.5) * 100;
-          positions[i3 + 1] = (Math.random() - 0.5) * 100;
-          positions[i3 + 2] = (Math.random() - 0.5) * 100;
+          positions[i3] = (random() - 0.5) * 100;
+          positions[i3 + 1] = (random() - 0.5) * 100;
+          positions[i3 + 2] = (random() - 0.5) * 100;
       }
       
       // Random color variation
       const colorVariation = 0.2;
-      colors[i3] = baseColor.r + (Math.random() - 0.5) * colorVariation;
-      colors[i3 + 1] = baseColor.g + (Math.random() - 0.5) * colorVariation;
-      colors[i3 + 2] = baseColor.b + (Math.random() - 0.5) * colorVariation;
+      colors[i3] = baseColor.r + (random() - 0.5) * colorVariation;
+      colors[i3 + 1] = baseColor.g + (random() - 0.5) * colorVariation;
+      colors[i3 + 2] = baseColor.b + (random() - 0.5) * colorVariation;
       
       // Random size variation
-      sizes[i] = size * (0.5 + Math.random() * 1.5);
+      sizes[i] = size * (0.5 + random() * 1.5);
       
       // Random lifetime
-      lifetimes[i] = Math.random();
+      lifetimes[i] = random();
     }
     
     velocitiesRef.current = velocities;
@@ -242,14 +254,21 @@ export function ShootingStars({ musicData }: { musicData?: MusicAnalysisData }) 
   const groupRef = useRef<THREE.Group>(null);
   const starsRef = useRef<Array<{ active: boolean; progress: number; direction: THREE.Vector3 }>>([]);
   
+  // Initialize shooting stars once on mount
   useMemo(() => {
-    starsRef.current = Array(10).fill(null).map(() => ({
+    const random = (i: number) => {
+      let value = i * 12345;
+      value = (value * 9301 + 49297) % 233280;
+      return value / 233280;
+    };
+    
+    starsRef.current = Array(10).fill(null).map((_, i) => ({
       active: false,
       progress: 0,
       direction: new THREE.Vector3(
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2
+        (random(i * 3) - 0.5) * 2,
+        (random(i * 3 + 1) - 0.5) * 2,
+        (random(i * 3 + 2) - 0.5) * 2
       ).normalize()
     }));
   }, []);
